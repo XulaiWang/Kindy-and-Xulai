@@ -54,3 +54,5 @@ class LazorSolver:
 
     def to_hashable(self, placed_blocks):
         return tuple(sorted(placed_blocks.items()))
+
+
