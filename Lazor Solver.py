@@ -126,3 +126,39 @@ class LazorSolver:
 
         # Do not select current element
         self.dfs(cur + 1, to, vec)
+
+def solve(self):
+        """ Try all possible block placement combinations """
+
+        self.empty_spaces = [(x * 2 + 1, y * 2 + 1) for y in range(len(self.grid)) for x in range(len(self.grid[0])) if
+                             self.grid[y][x] == "o"]
+
+        block_types = ['A'] * self.blocks['A'] + ['B'] * self.blocks['B'] + ['C'] * self.blocks['C']
+
+        occupied_spaces = {}
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j] != 'x' and self.grid[i][j] != 'o':
+                    occupied_spaces[(j * 2 + 1, i * 2 + 1)] = self.grid[i][j]
+
+        self.dfs(0, self.blocks['A'] + self.blocks['B'] + self.blocks['C'], [])
+        print("Block placement combinations generated")
+
+        unique_types = []
+        s = set()
+        for bb in itertools.permutations(block_types):
+            p = tuple(bb)
+            if p not in s:
+                s.add(p)
+                unique_types.append(bb)
+
+        for bb in unique_types:
+            for placement in self.vecs:
+                placed_blocks = {placement[i]: bb[i] for i in range(len(bb))}
+                for x, y in occupied_spaces:
+                    placed_blocks[(x, y)] = occupied_spaces[(x, y)]
+                if all(target in self.simulate_lasers(self.to_hashable(placed_blocks)) for target in self.targets):
+                    self.draw_grid(len(self.grid), len(self.grid[0]), placed_blocks)
+                    return placed_blocks
+
+        return None
