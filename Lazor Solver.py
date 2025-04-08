@@ -162,3 +162,37 @@ def solve(self):
                     return placed_blocks
 
         return None
+
+ def draw_grid(self, n, m, colored_cells):
+        fig, ax = plt.subplots(figsize=(m, n))
+        ax.set_aspect('equal')
+        plt.axis('off')
+
+        cell_width = 1.0
+        cell_height = 1.0
+
+        for i in range(n + 1):
+            ax.plot([0, m], [i, i], color='black', lw=1)
+        for j in range(m + 1):
+            ax.plot([j, j], [0, n], color='black', lw=1)
+
+        for (row, col) in colored_cells:
+            c = colored_cells[(row, col)]
+            row = (row - 1) / 2
+            col = (col - 1) / 2
+            x = row
+            y = n - col - 1
+
+            if c == 'A':
+                rect = patches.Rectangle(
+                    (x, y), cell_width, cell_height,
+                    edgecolor='black', facecolor='#ffa500', alpha=1)
+            elif c == 'B':
+                rect = patches.Rectangle(
+                    (x, y), cell_width, cell_height,
+                    edgecolor='black', facecolor='black', alpha=1)
+            elif c == 'C':
+                rect = patches.Rectangle(
+                    (x, y), cell_width, cell_height,
+                    edgecolor='black', facecolor='#00bfff', alpha=1)
+            ax.add_patch(rect)
