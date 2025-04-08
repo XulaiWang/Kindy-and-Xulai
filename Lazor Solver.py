@@ -196,3 +196,79 @@ def solve(self):
                     (x, y), cell_width, cell_height,
                     edgecolor='black', facecolor='#00bfff', alpha=1)
             ax.add_patch(rect)
+
+for (x, y), (dx, dy) in self.lasers:
+            tx = y / 2
+            ty = x / 2
+            tx = len(self.grid) - tx
+            ax.scatter(ty, tx, color='red', s=10, zorder=10)  # s = point size
+
+        for (x, y) in self.targets:
+            tx = y / 2
+            ty = x / 2
+            tx = len(self.grid) - tx
+            ax.scatter(ty, tx, color='red', s=100, zorder=10)  # s = point size
+
+        visited = set()  # Record points visited by lasers
+        seen_lasers = set()  # Track already simulated paths to avoid infinite loops
+        active_lasers = list(self.lasers)
+
+        while active_lasers:
+            (x, y), (dx, dy) = active_lasers.pop(0)
+
+            while 0 <= x <= 2 * len(self.grid[0]) and 0 <= y <= 2 * len(self.grid):
+                if (x, y, dx, dy) in seen_lasers:
+                    break
+                seen_lasers.add((x, y, dx, dy))
+
+                visited.add((x, y))
+
+                # **Check if hitting a block**
+                if (x + dx, y) in colored_cells:
+                    block = colored_cells[(x + dx, y)]
+
+                    if block == "A":  # Reflect
+                        dx = -dx
+                        active_lasers.append(((x, y), (dx, dy)))
+                        break
+                    elif block == "B":  # Absorb
+                        break
+                    elif block == "C":  # Refract
+                        active_lasers.append(((x, y), (-dx, dy)))
+                        t1 = len(self.grid) - y / 2
+                        t2 = len(self.grid) - (y + dy) / 2
+                        ax.plot([x / 2, (x + dx) / 2], [t1, t2], color=(1, 0, 0, 0.8), linewidth=0.8, zorder=10)
+                        x, y = x + dx, y + dy
+
+                elif (x, y + dy) in colored_cells:
+                    block = colored_cells[(x, y + dy)]
+
+                    if block == "A":
+                        dy = -dy
+                        active_lasers.append(((x, y), (dx, dy)))
+                        break
+                    elif block == "B":
+                        break
+                    elif block == "C":
+                        active_lasers.append(((x, y), (dx, -dy)))
+                        t1 = len(self.grid) - y / 2
+                        t2 = len(self.grid) - (y + dy) / 2
+                        ax.plot([x / 2, (x + dx) / 2], [t1, t2], color=(1, 0, 0, 0.8), linewidth=0.8, zorder=10)
+                        x, y = x + dx, y + dy
+
+                # **Move beam**
+                else:
+                    t1 = len(self.grid) - y / 2
+                    t2 = len(self.grid) - (y + dy) / 2
+                    ax.plot([x / 2, (x + dx) / 2], [t1, t2], color=(1, 0, 0, 0.8), linewidth=0.8, zorder=10)
+                    x, y = x + dx, y + dy
+
+        ax.set_xlim(-0.5, m + 0.5)
+        ax.set_ylim(-0.5, n + 0.5)
+        ax.grid(True, which='major', linestyle='--', alpha=0.7)
+        ax.grid(False, which='minor')
+        plt.savefig(configs.save_path, dpi=300, bbox_inches="tight")
+
+if __name__ == '__main__':
+    solver = LazorSolver(configs.path)
+    solution = solver.solve()
